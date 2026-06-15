@@ -30,6 +30,7 @@ body{
   width:100%;box-sizing:border-box;
 }
 .topbar-left{display:flex;align-items:center;gap:14px;}
+.topbar-left-text{display:flex;align-items:center;gap:14px;}
 .branch-badge{
   font-family:var(--mono);font-size:11px;font-weight:500;
   letter-spacing:.1em;padding:4px 10px;border-radius:20px;
@@ -37,6 +38,7 @@ body{
 }
 .sys-title{font-size:17px;font-weight:600;}
 .topbar-right{display:flex;align-items:center;gap:16px;}
+.topbar-right-btns{display:flex;align-items:center;gap:8px;}
 .clock{font-family:var(--mono);font-size:18px;font-weight:500;letter-spacing:.05em;}
 .date-str{font-family:var(--mono);font-size:11px;color:var(--text2);text-align:right;margin-top:2px;}
 .icon-btn{
@@ -70,49 +72,67 @@ body{
 /* ── TOPBAR RESPONSIVE ── */
 @media(max-width:600px){
   .topbar{
-    padding:6px 12px;
-    flex-wrap:wrap;
-    gap:0;
-    row-gap:2px;
+    padding:8px 12px;
+    gap:8px;
+    align-items:center;
   }
-  /* แถวบน: logo + ชื่อสาขา + ชื่อระบบ */
   .topbar-left{
     flex:1;
     min-width:0;
+    flex-direction:row;
+    align-items:center;
+    gap:10px;
+  }
+  /* โลโก้เต็มขนาด — ไม่ย่อ */
+  #companyLogo{
+    height:72px !important;
+    width:72px !important;
+    flex-shrink:0;
+  }
+  /* ซ้อน badge + title เป็นคอลัมน์ */
+  .topbar-left-text{
+    display:flex;
     flex-direction:column;
-    align-items:flex-start;
-    gap:0;
+    gap:3px;
+    min-width:0;
   }
   .branch-badge{
-    font-size:13px !important;
+    font-size:12px !important;
     display:block !important;
   }
   .sys-title{
     display:block !important;
-    font-size:10px;
+    font-size:11px;
     color:var(--text2);
+    font-weight:400;
   }
-  #companyLogo{
-    height:30px !important;
-    width:30px !important;
-  }
-  /* แถวขวา: นาฬิกา + วันที่ + ปุ่ม */
+  /* ฝั่งขวา: จัดเป็นคอลัมน์ */
   .topbar-right{
     flex-direction:column;
     align-items:flex-end;
-    gap:2px;
+    gap:4px;
+    flex-shrink:0;
   }
-  .clock{ font-size:14px; }
+  .clock{ font-size:15px; }
   .date-str{
     display:block !important;
     font-size:10px;
     color:var(--text2);
+    text-align:right;
+  }
+  /* ปุ่มและไอคอนเรียงแถวเดียว */
+  .topbar-right-btns{
+    display:flex;
+    align-items:center;
+    gap:6px;
   }
   .btn-register-top{
     font-size:11px;
-    padding:5px 8px;
+    padding:6px 10px;
+    white-space:nowrap;
   }
-  .reg-text{ display:none; }
+  /* แสดงชื่อปุ่มเต็ม */
+  .reg-text{ display:inline !important; }
   .main{
     padding:14px 12px 24px;
     flex:1;
@@ -121,6 +141,7 @@ body{
 
 @media(max-width:400px){
   .clock{ font-size:13px; }
+  .btn-register-top{ font-size:10px; padding:5px 7px; }
 }
 
 
@@ -366,19 +387,21 @@ const CONFIG = {
 <header class="topbar">
   <div class="topbar-left">
     <img id="companyLogo" src="" alt="logo" style="height:72px;width:72px;object-fit:contain;display:none;flex-shrink:0;align-self:center;">
-    <div class="branch-badge" id="branchBadge">SSS Office</div>
-    <div class="sys-title">บันทึกเวลาพนักงาน</div>
+    <div class="topbar-left-text">
+      <div class="branch-badge" id="branchBadge">SSS Office</div>
+      <div class="sys-title">บันทึกเวลาพนักงาน</div>
+    </div>
   </div>
   <div class="topbar-right">
     <div>
       <div class="clock" id="clock">00:00:00</div>
       <div class="date-str" id="dateStr">—</div>
     </div>
-    <button class="btn-register-top" onclick="openRegister()">
-  ＋ <span class="reg-text">ลงทะเบียนพนักงานใหม่</span>
-</button>
-<button class="icon-btn" onclick="openEmpList()" title="รายชื่อพนักงาน">👥</button>
-<button class="icon-btn" onclick="openGuide()" title="คู่มือการใช้งาน">?</button>
+    <div class="topbar-right-btns">
+      <button class="btn-register-top" onclick="openRegister()">＋ <span class="reg-text">ลงทะเบียนพนักงานใหม่</span></button>
+      <button class="icon-btn" onclick="openEmpList()" title="รายชื่อพนักงาน">👥</button>
+      <button class="icon-btn" onclick="openGuide()" title="คู่มือการใช้งาน">?</button>
+    </div>
   </div>
 </header>
 
