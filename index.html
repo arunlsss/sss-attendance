@@ -278,33 +278,49 @@ body{
 .btn-submit:not(:disabled):hover{filter:brightness(1.08);transform:translateY(-1px);}
 .btn-submit:not(:disabled):active{transform:translateY(0);}
 
-/* ── UPLOAD STATUS BAR ── */
+/* ── UPLOAD STATUS CENTER ── */
 #uploadStatusBar{
-  position:fixed;bottom:0;left:0;right:0;
-  display:flex;flex-direction:column;gap:0;
-  z-index:500;pointer-events:none;
+  position:fixed;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;gap:12px;
+  z-index:600;pointer-events:none;
+  width:min(400px, 90vw);
 }
 .upload-item{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 18px;font-size:12px;
-  border-top:1px solid rgba(255,255,255,.06);
-  background:rgba(15,17,23,.92);
-  backdrop-filter:blur(4px);
-  transition:opacity .4s,max-height .4s;
-  max-height:48px;overflow:hidden;
+  display:flex;align-items:center;gap:16px;
+  padding:20px 24px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(14,17,28,.98);
+  backdrop-filter:blur(24px);
+  box-shadow:0 0 0 1px rgba(79,142,247,.15), 0 20px 60px rgba(0,0,0,.7);
+  transition:opacity .45s, transform .45s;
+  opacity:1;transform:scale(1);
 }
-.upload-item.done{ opacity:0;max-height:0;padding:0 18px; }
+.upload-item.done{
+  opacity:0;
+  transform:scale(.93);
+  pointer-events:none;
+}
 .upload-dot{
-  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+  width:11px;height:11px;border-radius:50%;flex-shrink:0;
 }
 .upload-dot.uploading{
   background:var(--accent);
+  box-shadow:0 0 8px var(--accent);
   animation:pulse 1.2s ease-in-out infinite;
 }
-.upload-dot.success{ background:var(--accent2); }
-.upload-dot.fail{ background:var(--danger); }
-.upload-name{ font-weight:500;color:var(--text); }
-.upload-status{ color:var(--text2);flex:1; }
+.upload-dot.success{
+  background:var(--accent2);
+  box-shadow:0 0 8px var(--accent2);
+}
+.upload-dot.fail{
+  background:var(--danger);
+  box-shadow:0 0 8px var(--danger);
+}
+.upload-name{ font-weight:600;color:var(--text);font-size:14px; }
+.upload-status{ color:var(--text2);flex:1;font-size:12px;margin-top:3px; }
 .upload-status.success{ color:var(--accent2); }
 .upload-status.fail{ color:var(--danger); }
 
@@ -651,8 +667,10 @@ function addUploadStatus(logId, empName, logTypeTh){
   el.id = 'upload-' + logId;
   el.innerHTML =
     '<span class="upload-dot uploading"></span>' +
-    '<span class="upload-name">' + escapeHtml(empName) + '</span>' +
-    '<span class="upload-status" id="upload-status-' + logId + '">กำลังอัพโหลดรูป ' + logTypeTh + '...</span>';
+    '<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;">' +
+      '<span class="upload-name">' + escapeHtml(empName) + ' · ' + logTypeTh + '</span>' +
+      '<span class="upload-status" id="upload-status-' + logId + '">กำลังอัพโหลดรูป...</span>' +
+    '</div>';
   bar.appendChild(el);
 }
 
@@ -664,10 +682,10 @@ function updateUploadStatus(logId, type, msg){
   dot.className = 'upload-dot ' + type;
   statusEl.className = 'upload-status ' + type;
   statusEl.textContent = msg;
-  const delay = (type === 'success') ? 2500 : 5000;
+  const delay = (type === 'success') ? 3000 : 7000;
   setTimeout(()=>{
     el.classList.add('done');
-    setTimeout(()=>{ el.remove(); }, 450);
+    setTimeout(()=>{ el.remove(); }, 500);
   }, delay);
 }
 
@@ -1015,7 +1033,6 @@ function updateSubmitBtn(){
 async function submitLog(){
   if(!selectedEmp || !photoDataUrl || !selectedLoc || isSubmitting) return;
   isSubmitting = true; updateSubmitBtn();
-  showToast('กำลังบันทึก...', 'loading');
 
   const now        = new Date();
   const dd         = String(now.getDate()).padStart(2,'0');
@@ -1066,21 +1083,20 @@ async function doWriteLog(dateTimeStr, logId, todayStr, forceWrite){
   const {lat, lng}  = gpsResult;
 
   // ปล่อย UI ทันทีให้คนต่อไปใช้ได้ — ไม่รอรูปอัพโหลด
-  showToast(`บันทึกแล้ว · ${empNameSnap} · ${logTypeTh}`, 'success');
   isSubmitting = false; updateSubmitBtn();
-  setTimeout(() => { clearEmployee(); retakePhoto(); clearNote(); }, 1800);
+  setTimeout(() => { clearEmployee(); retakePhoto(); clearNote(); }, 400);
 
-  // แสดง status bar บอกว่ากำลังอัพโหลดรูป (ไม่บล็อก UI)
+  // แสดง card กลางจอ "กำลังอัพโหลด" (ไม่บล็อก UI)
   addUploadStatus(logId, empNameSnap, logTypeTh);
 
-  // background: อัปเดต GPS + รูปจริง
+  // background: อัปเดต GPS + รูปจริง — เมื่อเสร็จค่อยแจ้งสำเร็จ
   compressImage(photoSnap, 320, 240, 0.6)
     .then(compressed => uploadPhotoToDrive(compressed, `${logId}_${selectedEmp ? selectedEmp.id : 'emp'}.jpg`))
     .then(r => gasPost({action:'updateLogPhoto', logId, photoUrl: r.viewUrl, lat, lng}))
-    .then(() => updateUploadStatus(logId, 'success', `อัพโหลดรูป ${logTypeTh} สำเร็จ ✓`))
+    .then(() => updateUploadStatus(logId, 'success', `✓ บันทึกและอัพโหลดรูปสำเร็จ`))
     .catch(e => {
       console.warn('Background upload failed:', e);
-      updateUploadStatus(logId, 'fail', `อัพโหลดรูปไม่สำเร็จ — ${e.message || 'ลองใหม่ภายหลัง'}`);
+      updateUploadStatus(logId, 'fail', `บันทึกแล้ว แต่อัพโหลดรูปไม่สำเร็จ — ${e.message || 'ลองใหม่ภายหลัง'}`);
     });
 }
 
@@ -1307,7 +1323,8 @@ function showToast(msg,type=''){
   const t=document.getElementById('toast');
   t.textContent=msg; t.className=`toast show ${type}`;
   clearTimeout(toastTimer);
-  if(type!=='loading') toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+  const delay = type==='loading' ? 2000 : 3500;
+  toastTimer=setTimeout(()=>t.classList.remove('show'), delay);
 }
 
 // ─────────────────────────────────────────────────────────────
