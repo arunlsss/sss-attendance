@@ -386,7 +386,15 @@
       .submit-wrap { bottom: max(10px, env(safe-area-inset-bottom)); }
       .toast-stack { right: 10px; bottom: max(10px, env(safe-area-inset-bottom)); width: calc(100vw - 20px); }
     }
-  </style>
+  /* Consistent control sizes and registration row alignment. */
+    label.field-label { font-size:14px; line-height:24px; margin-bottom:8px; }
+    select,input { min-height:48px; font-size:16px; line-height:24px; box-sizing:border-box; min-width:0; }
+    .header-actions { align-items:flex-end; flex-wrap:wrap; }
+    .header-actions .theme-select { min-height:48px; font-size:16px; }
+    .register-grid { align-items:end; }
+    .register-grid .field + .field { margin-top:0; }
+    .register-grid .field { min-width:0; }
+    </style>
 </head>
 <body>
 <div class="app-shell">
